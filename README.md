@@ -1,2 +1,2 @@
 
-[<img src="./schema-diagram.svg">]()
+<img src="./schema-diagram.svg">
