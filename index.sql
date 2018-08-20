@@ -1,5 +1,5 @@
-DROP DATABASE app;
-CREATE DATABASE app;
+--DROP DATABASE app;
+CREATE DATABASE IF NOT EXISTS app;
 USE app;
 
 -- Stores Transactions 
@@ -314,12 +314,12 @@ SELECT
 FROM map_key
 	INNER JOIN kv_pair
 		ON map_key.map_key_id = kv_pair.map_key_id
-	INNER JOIN vm_query_object__kv_pair
+	INNER JOIN vm_query_object_kv_pair
 		ON vm_query_object_kv_pair.kv_pair_id = kv_pair.kv_pair_id
-	INNER JOIN vm_query
-		ON vm_query.vm_query_object_id = vm_query_object_kv_pair.vm_query_object_id	
+	INNER JOIN vm_query_object
+		ON vm_query_object.vm_query_object_id = vm_query_object_kv_pair.vm_query_object_id	
 	INNER JOIN vm
-		ON vm.vm_query_object_id = vm_query.vm_query_object_id
+		ON vm.vm_query_object_id = vm_query_object.vm_query_object_id
 	INNER JOIN vm_type
 		ON vm_type.vm_type_id = vm.vm_type_id
 WHERE kv_pair.value = 'f96e46fb-0425-49bb-973c-a0e0c446af41'
