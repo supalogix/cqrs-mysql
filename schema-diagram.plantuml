@@ -1,0 +1,57 @@
+@startuml
+!define TABLE (T, #FFAAAA) DB Table
+
+class transaction <<TABLE>>
+transaction : aggregate_id
+transaction : transaction_id
+transaction : next_transaction_id
+transaction : last_transaction_id
+transaction : creation_time
+transaction : version
+transaction : data
+
+class vm_type <<TABLE>>
+vm_type : vm_type_id
+vm_type : name
+vm_type : description
+
+class vm <<TABLE>>
+vm : vm_id
+vm : vm_type_id
+vm : vm_query_object_id
+
+class vm_cache <<TABLE>>
+vm_cache : vm_id
+vm_cache : creation_time
+vm_cache : data
+
+class vm_query_object <<TABLE>>
+vm_query_object : vm_query_object_id
+
+class vm_query_object_kv_pair <<TABLE>>
+vm_query_object_kv_pair : vm_query_object_id
+vm_query_object_kv_pair : kv_pair_id
+
+class kv_pair <<TABLE>>
+kv_pair : kv_pair_id
+kv_pair : map_key_id
+kv_pair : value
+
+class map_key <<TABLE>>
+map_key : map_key_id
+map_key : name
+map_key : description
+
+class vm_transaction <<TABLE>>
+vm_transaction : vm_id
+vm_transaction : transaction_id
+
+vm "m" -- "1" vm_query_object
+vm_type "1" -- "m" vm
+vm "1" -- "m" vm_transaction
+vm_transaction "1" -- "1" transaction
+vm_cache "1" -- "1" vm
+vm_query_object_kv_pair "1" -- "m" vm_query_object
+vm_query_object_kv_pair "1" -- "m" kv_pair
+map_key "1" -- "m" kv_pair
+@enduml
