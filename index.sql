@@ -2,12 +2,12 @@
 CREATE DATABASE IF NOT EXISTS app;
 USE app;
 
--- Stores Transactions 
-CREATE TABLE IF NOT EXISTS transaction (
+-- Stores Events 
+CREATE TABLE IF NOT EXISTS event (
 	aggregate_id BINARY(16) NOT NULL,
-	transaction_id BINARY(16) PRIMARY KEY,
-	next_transaction_id BINARY(16) UNIQUE NOT NULL,
-	last_transaction_id BINARY(16),
+	event_id BINARY(16) PRIMARY KEY,
+	next_event_id BINARY(16) UNIQUE NOT NULL,
+	last_event_id BINARY(16),
 	creation_time VARCHAR(25) NOT NULL,
 	version INTEGER NOT NULL,
 	data JSON
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS transaction (
 CREATE TABLE IF NOT EXISTS aggregate_cache (
 	aggregate_id BINARY(16) PRIMARY KEY,
 	version INTEGER NOT NULL,
-	transaction_id BINARY(16) UNIQUE,
+	event_id BINARY(16) UNIQUE,
 	creation_time VARCHAR(25) NOT NULL,
 	data JSON
 );
@@ -34,15 +34,15 @@ CREATE TABLE IF NOT EXISTS vm_type (
 CREATE TABLE IF NOT EXISTS vm (
 	vm_id BINARY(16) PRIMARY KEY,
 	vm_type_id BINARY(16) NOT NULL,
-	vm_query_object_id BINARY(16) NOT NULL,
-	INDEX(vm_type_id, vm_query_object_id)
+	query_object_id BINARY(16) NOT NULL,
+	INDEX(vm_type_id, query_object_id)
 );
 
--- Stores the transactions associated with a view model
-CREATE TABLE IF NOT EXISTS vm_transaction (
+-- Stores the event associated with a view model
+CREATE TABLE IF NOT EXISTS vm_event (
 	vm_id BINARY(16),
-	transaction_id BINARY(16),
-	INDEX( vm_id, transaction_id )
+	event_id BINARY(16),
+	INDEX( vm_id, event_id )
 );
 
 -- Stores snapshots of viewmodels at a particular time
@@ -54,8 +54,8 @@ CREATE TABLE IF NOT EXISTS vm_cache (
 );
 
 -- Store vm query objects
-CREATE TABLE IF NOT EXISTS vm_query_object (
-	vm_query_object_id BINARY(16) PRIMARY KEY
+CREATE TABLE IF NOT EXISTS query_object (
+	query_object_id BINARY(16) PRIMARY KEY
 );
 
 -- Stores key information for key value pairs
@@ -75,11 +75,11 @@ CREATE TABLE IF NOT EXISTS kv_pair(
 );
 
 -- Use to associate a query object with multiple key-value pairs
-CREATE TABLE IF NOT EXISTS vm_query_object_kv_pair (
-	vm_query_object_id binary(16) not null,
+CREATE TABLE IF NOT EXISTS query_object_kv_pair (
+	query_object_id binary(16) not null,
 	kv_pair_id binary(16) not null,
 	INDEX (
-		vm_query_object_id,
+		query_object_id,
 		kv_pair_id
 	)
 );
@@ -126,12 +126,12 @@ values
 --
 -- Fake Account Created
 --
-INSERT INTO transaction 
+INSERT INTO event 
 (
 	aggregate_id,
-	transaction_id,
-	next_transaction_id,
-	last_transaction_id,
+	event_id,
+	next_event_id,
+	last_event_id,
 	creation_time,
 	version,
 	data
@@ -146,9 +146,9 @@ VALUES
 	1,
 	'{
 		"aggregate_id": "f96e46fb-0425-49bb-973c-a0e0c446af41",
-		"transaction_id": "b0a8c834-7e77-4782-be73-6d950729e795",
-		"next_transaction_id": "60a39e17-1ccf-4c81-9377-d2e41fa49709",
-		"last_transaction_id": null,
+		"event_id": "b0a8c834-7e77-4782-be73-6d950729e795",
+		"next_event_id": "60a39e17-1ccf-4c81-9377-d2e41fa49709",
+		"last_event_id": null,
 		"creation_time": "2018-10-01T11:12:11+00:00",
 		"version": "1",
 		"type": "ACCOUNT_CREATED",
@@ -161,9 +161,9 @@ VALUES
 );
 
 -- Create query object for new account
-INSERT INTO vm_query_object
+INSERT INTO query_object
 (
-	vm_query_object_id
+	query_object_id
 )
 VALUES
 (
@@ -185,9 +185,9 @@ VALUES
 );
 
 -- Associate the key-value pair with the query object
-INSERT INTO vm_query_object_kv_pair
+INSERT INTO query_object_kv_pair
 (
-	vm_query_object_id,
+	query_object_id,
 	kv_pair_id
 )
 VALUES
@@ -201,7 +201,7 @@ INSERT INTO vm
 (
 	vm_id,
 	vm_type_id,
-	vm_query_object_id
+	query_object_id
 )
 VALUES
 (
@@ -210,11 +210,11 @@ VALUES
 	uuid_to_bin('51c662f5-7b8e-4ddd-88de-c68f8ce2f7a7')
 );
 
--- Associate the view model with the transaction
-INSERT INTO vm_transaction
+-- Associate the view model with the event
+INSERT INTO vm_event
 (
 	vm_id,
-	transaction_id
+	event_id
 )
 VALUES
 (
@@ -225,12 +225,12 @@ VALUES
 -- 
 -- Password Changed on Fake Account
 --
-INSERT INTO transaction 
+INSERT INTO event 
 (
 	aggregate_id,
-	transaction_id,
-	next_transaction_id,
-	last_transaction_id,
+	event_id,
+	next_event_id,
+	last_event_id,
 	creation_time,
 	version,
 	data
@@ -245,9 +245,9 @@ VALUES
 	2,
 	'{
 		"aggregate_id": "f96e46fb-0425-49bb-973c-a0e0c446af41",
-		"transaction_id": "60a39e17-1ccf-4c81-9377-d2e41fa49709",
-		"next_transaction_id": "7a2828e3-6ef0-40f6-8bdf-415d11dc43f2",
-		"last_transaction_id": "b0a8c834-7e77-4782-be73-6d950729e795",
+		"event_id": "60a39e17-1ccf-4c81-9377-d2e41fa49709",
+		"next_event_id": "7a2828e3-6ef0-40f6-8bdf-415d11dc43f2",
+		"last_event_id": "b0a8c834-7e77-4782-be73-6d950729e795",
 		"creation_time": "2018-10-01T11:12:11+00:00",
 		"version": "2",
 		"type": "PASSWORD_CHANGED",
@@ -257,11 +257,11 @@ VALUES
 	}'
 );
 
--- Associate the viewmodel with the transaction
-INSERT INTO vm_transaction
+-- Associate the viewmodel with the event
+INSERT INTO vm_event
 (
 	vm_id,
-	transaction_id
+	event_id
 )
 VALUES
 (
@@ -274,39 +274,39 @@ VALUES
 -- Sample Queries
 -- 
 
--- Get all transactions
+-- Get all events
 SELECT
 	bin_to_uuid(aggregate_id),
-	bin_to_uuid(transaction_id),
-	bin_to_uuid(next_transaction_id),
-	bin_to_uuid(last_transaction_id),
+	bin_to_uuid(event_id),
+	bin_to_uuid(next_event_id),
+	bin_to_uuid(last_event_id),
 	creation_time,
 	version,
 	data
-FROM transaction;
+FROM event;
 
--- Get all transactions for a particular view model
+-- Get all event for a particular view model
 SELECT
-	transaction.data	
+	event.data	
 FROM map_key
 	INNER JOIN kv_pair
 		ON map_key.map_key_id = kv_pair.map_key_id
-	INNER JOIN vm_query_object_kv_pair
-		ON vm_query_object_kv_pair.kv_pair_id = kv_pair.kv_pair_id
-	INNER JOIN vm_query_object
-		ON vm_query_object.vm_query_object_id = vm_query_object_kv_pair.vm_query_object_id	
+	INNER JOIN query_object_kv_pair
+		ON query_object_kv_pair.kv_pair_id = kv_pair.kv_pair_id
+	INNER JOIN query_object
+		ON query_object.query_object_id = query_object_kv_pair.query_object_id	
 	INNER JOIN vm
-		ON vm.vm_query_object_id = vm_query_object.vm_query_object_id
+		ON vm.query_object_id = query_object.query_object_id
 	INNER JOIN vm_type
 		ON vm_type.vm_type_id = vm.vm_type_id
-	INNER JOIN vm_transaction
-		ON vm_transaction.vm_id = vm.vm_id
-	INNER JOIN transaction
-		ON transaction.transaction_id = vm_transaction.transaction_id
+	INNER JOIN vm_event
+		ON vm_event.vm_id = vm.vm_id
+	INNER JOIN event
+		ON event.event_id = vm_event.event_id
 WHERE kv_pair.value = 'f96e46fb-0425-49bb-973c-a0e0c446af41'
 	AND map_key.name = 'aggregate_id'
 	AND vm_type.name = 'account-v1b1'
-ORDER BY transaction.creation_time ASC;
+ORDER BY event.creation_time ASC;
 
 -- Find view model id for a query object
 SELECT
@@ -314,15 +314,14 @@ SELECT
 FROM map_key
 	INNER JOIN kv_pair
 		ON map_key.map_key_id = kv_pair.map_key_id
-	INNER JOIN vm_query_object_kv_pair
-		ON vm_query_object_kv_pair.kv_pair_id = kv_pair.kv_pair_id
-	INNER JOIN vm_query_object
-		ON vm_query_object.vm_query_object_id = vm_query_object_kv_pair.vm_query_object_id	
+	INNER JOIN query_object_kv_pair
+		ON query_object_kv_pair.kv_pair_id = kv_pair.kv_pair_id
+	INNER JOIN query_object
+		ON query_object.query_object_id = query_object_kv_pair.query_object_id	
 	INNER JOIN vm
-		ON vm.vm_query_object_id = vm_query_object.vm_query_object_id
+		ON vm.query_object_id = query_object.query_object_id
 	INNER JOIN vm_type
 		ON vm_type.vm_type_id = vm.vm_type_id
 WHERE kv_pair.value = 'f96e46fb-0425-49bb-973c-a0e0c446af41'
 	AND map_key.name = 'aggregate_id'
 	AND vm_type.name = 'account-v1b1';
-

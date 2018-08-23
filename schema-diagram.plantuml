@@ -1,14 +1,14 @@
 @startuml
 !define TABLE (T, #FFAAAA) DB Table
 
-class transaction <<TABLE>>
-transaction : aggregate_id:uuid
-transaction : transaction_id:uuid
-transaction : next_transaction_id:uuid
-transaction : last_transaction_id:uuid
-transaction : creation_time:varchar
-transaction : version:integer
-transaction : data:JSON
+class event <<TABLE>>
+event : aggregate_id:uuid
+event : event_id:uuid
+event : next_event_id:uuid
+event : last_event_id:uuid
+event : creation_time:varchar
+event : version:integer
+event : data:JSON
 
 class vm_type <<TABLE>>
 vm_type : vm_type_id:uuid
@@ -18,19 +18,19 @@ vm_type : description:varchar
 class vm <<TABLE>>
 vm : vm_id:uuid
 vm : vm_type_id:uuid
-vm : vm_query_object_id:uuid
+vm : query_object_id:uuid
 
 class vm_cache <<TABLE>>
 vm_cache : vm_id:uuid
 vm_cache : creation_time:varchar
 vm_cache : data:JSON
 
-class vm_query_object <<TABLE>>
-vm_query_object : vm_query_object_id:uuid
+class query_object <<TABLE>>
+query_object : query_object_id:uuid
 
-class vm_query_object_kv_pair <<TABLE>>
-vm_query_object_kv_pair : vm_query_object_id:uuid
-vm_query_object_kv_pair : kv_pair_id:uuid
+class query_object_kv_pair <<TABLE>>
+query_object_kv_pair : query_object_id:uuid
+query_object_kv_pair : kv_pair_id:uuid
 
 class kv_pair <<TABLE>>
 kv_pair : kv_pair_id:uuid
@@ -42,16 +42,16 @@ map_key : map_key_id:uuid
 map_key : name:varchar
 map_key : description:varchar
 
-class vm_transaction <<TABLE>>
-vm_transaction : vm_id:uuid
-vm_transaction : transaction_id:uuid
+class vm_event <<TABLE>>
+vm_event : vm_id:uuid
+vm_event : event_id:uuid
 
-vm "m" -- "1" vm_query_object
+vm "m" -- "1" query_object
 vm_type "1" -- "m" vm
-vm "1" -- "m" vm_transaction
-vm_transaction "1" -- "1" transaction
+vm "1" -- "m" vm_event
+vm_event "1" -- "1" event
 vm_cache "1" -- "1" vm
-vm_query_object_kv_pair "1" -- "m" vm_query_object
-vm_query_object_kv_pair "1" -- "m" kv_pair
+query_object_kv_pair "1" -- "m" query_object
+query_object_kv_pair "1" -- "m" kv_pair
 map_key "1" -- "m" kv_pair
 @enduml
